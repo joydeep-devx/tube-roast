@@ -15,11 +15,14 @@ function Hero() {
   const roasts = useRoasts(authStatus)
 
   return (
+    // Grid columns default to min-width: auto and refuse to shrink below their widest unbreakable content
+    // (e.g. the JSON preview), which made the whole page wider than the phone. min-w-0 lets them shrink.
+    // overflow-x-clip trims the decorative glow on very narrow screens without creating a scroll container.
     <section
       aria-labelledby="hero-heading"
-      className="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-12 pb-20 sm:px-6 lg:grid-cols-2 lg:pt-20"
+      className="mx-auto grid max-w-6xl items-center gap-12 overflow-x-clip px-4 pt-12 pb-20 sm:px-6 lg:grid-cols-2 lg:pt-20"
     >
-      <m.div variants={staggerContainer(0.1)} initial="hidden" animate="visible">
+      <m.div variants={staggerContainer(0.1)} initial="hidden" animate="visible" className="min-w-0">
         <m.p
           variants={fadeUp}
           className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-sm text-muted"
@@ -52,7 +55,7 @@ function Hero() {
 
       <m.div
         id="sample"
-        className="relative isolate scroll-mt-24"
+        className="relative isolate min-w-0 scroll-mt-24"
         initial={fadeUpScale.hidden}
         animate={{ ...fadeUpScale.visible, transition: { ...fadeUpScale.visible.transition, delay: 0.35 } }}
       >

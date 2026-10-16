@@ -22,14 +22,14 @@ function ProfileInsights({ profile }) {
         </ul>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 [&>*]:min-w-0">
         {topChannels.length > 0 && (
           <div>
             <h4 className="text-xs font-medium tracking-wide text-muted uppercase">Most-liked channels</h4>
             <ol className="mt-2 space-y-1 text-sm">
               {topChannels.map((channel) => (
                 <li key={channel.name} className="flex justify-between gap-3">
-                  <span className="truncate">{channel.name}</span>
+                  <span className="min-w-0 truncate">{channel.name}</span>
                   <span className="shrink-0 text-muted">{channel.likes} likes</span>
                 </li>
               ))}
@@ -43,7 +43,7 @@ function ProfileInsights({ profile }) {
             <ul className="mt-2 space-y-1 text-sm">
               {profile.topCategories.slice(0, 3).map((category) => (
                 <li key={category.name} className="flex justify-between gap-3">
-                  <span className="truncate">{category.name}</span>
+                  <span className="min-w-0 truncate">{category.name}</span>
                   <span className="shrink-0 text-muted">{percent(category.share)}</span>
                 </li>
               ))}

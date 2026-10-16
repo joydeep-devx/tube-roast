@@ -45,7 +45,7 @@ function YouTubeSummaryCard({ summary, onDisconnect }) {
         </button>
       </div>
 
-      <dl className="mt-4 grid grid-cols-3 gap-3">
+      <dl className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
         {STATS.map(({ key, label }) => {
           const count = summary.counts[key]
           const isCapped = count >= summary.limits[key]
