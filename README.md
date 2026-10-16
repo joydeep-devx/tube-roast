@@ -2,7 +2,7 @@
 
 TubeRoast connects to your Google account, looks at the YouTube data Google lets it read, and generates a personalized, good-natured roast of your taste using an LLM.
 
-> **Status:** early development. Google sign-in and read-only YouTube connection work; analysis and roasts are next.
+> **Status:** working MVP. Sign in with Google, connect YouTube read-only, and get an AI-written roast of your taste. Roast history UI and deployment are next.
 
 ## What data TubeRoast uses
 
@@ -18,7 +18,9 @@ This data is fetched from YouTube when needed and is **not stored**. The short-l
 
 It **cannot** see your watch history. The YouTube Data API has not exposed watch history since 2016.
 
-Only an aggregated summary (top channels, topics and counts) is sent to the LLM. OAuth tokens and raw activity lists are never sent to the LLM or stored long term.
+**Roasting** turns that data into a small summary (top channels, categories, keywords, video-length and playlist stats, and "traits") with deterministic, unit-tested code. Only this summary is sent to the AI model, hosted by NVIDIA. You can see exactly what is sent under "What the AI will see". The model writes the jokes; it is an existing general-purpose LLM, not a custom-trained model.
+
+TubeRoast stores your 20 most recent roasts with a tiny snapshot (counts, top 3 channels, traits). OAuth tokens, raw YouTube data and the full summary are never stored.
 
 ## Tech stack
 
@@ -26,7 +28,7 @@ Only an aggregated summary (top channels, topics and counts) is sent to the LLM.
 | -------- | ------------------------------------------------- |
 | Frontend | React, Vite, Tailwind CSS, Motion                 |
 | Backend  | Node.js, Express, Zod, MongoDB + Mongoose, express-session |
-| Services | Google OAuth 2.0, YouTube Data API v3; NVIDIA hosted LLM API *(planned)* |
+| Services | Google OAuth 2.0, YouTube Data API v3, NVIDIA hosted LLM API (OpenAI-compatible) |
 
 ## Project structure
 
@@ -47,6 +49,12 @@ Requirements: Node.js `>=22.12.0` (developed on Node 24), npm, a MongoDB databas
 3. Under **Data Access**, add the `openid`, `.../auth/userinfo.profile` and `.../auth/youtube.readonly` scopes. The YouTube scope is listed as *sensitive*; that is fine while the app is in Testing.
 4. Under **Clients**, create a **Web application** client with the authorized redirect URI `http://localhost:5173/api/auth/google/callback`.
 5. Copy the client ID and secret into `server/.env`. The secret is shown only once.
+
+### NVIDIA API key
+
+1. Sign in at https://build.nvidia.com, open **API Keys** from your account menu and click **Generate API Key**.
+2. Copy the key (it starts with `nvapi-`) into `server/.env` as `NVIDIA_API_KEY`. Keep it server-side only.
+3. Optionally set `NVIDIA_MODEL` to another model listed by `GET https://integrate.api.nvidia.com/v1/models` that supports structured output.
 
 Run the API and the client in two terminals.
 

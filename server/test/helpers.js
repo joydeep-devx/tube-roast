@@ -64,6 +64,39 @@ export function createFakeYouTubeClient() {
   return { fetchActivity: vi.fn(async () => rawYouTubeActivity) }
 }
 
+export const fakeRoastOutput = {
+  headline: 'Speedrunner of Sadness',
+  roast: 'You split your likes between Minecraft speedruns and lofi beats, which is a very efficient way to avoid your feelings.',
+  verdict: 'Emotional speedrunner',
+  model: 'fake/model',
+}
+
+export function createFakeRoastGenerator() {
+  return { generate: vi.fn(async () => fakeRoastOutput) }
+}
+
+// Stands in for MongoDB-backed roast storage, enforcing the same ownership rules as roastService.
+export function createFakeRoastService() {
+  const roasts = []
+  let nextId = 1
+  const owned = (userId, id) => roasts.find((roast) => roast.id === id && roast.userId === userId)
+  return {
+    roasts,
+    createRoast: vi.fn(async (fields) => {
+      const roast = { id: `roast${nextId++}`, createdAt: new Date(), ...fields }
+      roasts.unshift(roast)
+      return roast
+    }),
+    listRoasts: vi.fn(async (userId) => roasts.filter((roast) => roast.userId === userId)),
+    findRoast: vi.fn(async (userId, id) => owned(userId, id) ?? null),
+    deleteRoast: vi.fn(async (userId, id) => {
+      const roast = owned(userId, id)
+      if (roast) roasts.splice(roasts.indexOf(roast), 1)
+      return Boolean(roast)
+    }),
+  }
+}
+
 // Stands in for MongoDB: users live in a Map for the duration of one test.
 export function createFakeUserService() {
   const users = new Map()
@@ -83,7 +116,10 @@ export function createFakeUserService() {
 export function createTestApp({
   googleAuth = createFakeGoogleAuth(),
   youtubeClient = createFakeYouTubeClient(),
+  roastGenerator = createFakeRoastGenerator(),
+  roastService = createFakeRoastService(),
   userService = createFakeUserService(),
+  roastRateLimiter,
 } = {}) {
   const app = createApp({
     config: {
@@ -93,10 +129,13 @@ export function createTestApp({
     },
     googleAuth,
     youtubeClient,
+    roastGenerator,
+    roastService,
     userService,
     sessionStore: undefined, // express-session's in-memory store
+    roastRateLimiter,
   })
-  return { app, googleAuth, youtubeClient, userService }
+  return { app, googleAuth, youtubeClient, roastGenerator, roastService, userService }
 }
 
 // Reads one cookie's value from a Set-Cookie response header.

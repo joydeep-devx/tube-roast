@@ -1,13 +1,18 @@
 import { useReducedMotion } from 'motion/react'
 import * as m from 'motion/react-m'
 import { fadeUp, fadeUpScale, staggerContainer } from '../../lib/motion.js'
-import { sampleRoast } from '../../mocks/sampleRoast.js'
 import { FlameIcon } from '../Icons.jsx'
+import { useAuth } from '../../auth/useAuth.js'
+import { useRoasts } from '../../roast/useRoasts.js'
+import { useYouTubeConnection } from '../../youtube/useYouTubeConnection.js'
 import HeroActions from './HeroActions.jsx'
-import RoastPreviewCard from './RoastPreviewCard.jsx'
+import RoastShowcase from './RoastShowcase.jsx'
 
 function Hero() {
   const prefersReducedMotion = useReducedMotion()
+  const { status: authStatus } = useAuth()
+  const youtube = useYouTubeConnection(authStatus)
+  const roasts = useRoasts(authStatus)
 
   return (
     <section
@@ -41,7 +46,7 @@ function Hero() {
         </m.p>
 
         <m.div variants={fadeUp}>
-          <HeroActions />
+          <HeroActions youtube={youtube} roasts={roasts} />
         </m.div>
       </m.div>
 
@@ -58,7 +63,7 @@ function Hero() {
           animate={prefersReducedMotion ? undefined : { opacity: [0.5, 0.9, 0.5], scale: [0.97, 1.02, 0.97] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <RoastPreviewCard roast={sampleRoast} />
+        <RoastShowcase roasts={roasts} canRoast={youtube.status === 'connected'} />
       </m.div>
     </section>
   )

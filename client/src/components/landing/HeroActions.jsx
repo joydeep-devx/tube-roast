@@ -1,6 +1,5 @@
 import * as m from 'motion/react-m'
 import { useAuth } from '../../auth/useAuth.js'
-import { useYouTubeConnection } from '../../youtube/useYouTubeConnection.js'
 import GoogleSignInButton from '../GoogleSignInButton.jsx'
 import { FlameIcon, PlayIcon } from '../Icons.jsx'
 import YouTubeSummaryCard from './YouTubeSummaryCard.jsx'
@@ -31,11 +30,11 @@ function Note({ children }) {
 
 /**
  * The hero's call to action walks the user through each step:
- * sign in → connect YouTube (read-only) → see what we found → (next milestone) get roasted.
+ * sign in → connect YouTube (read-only) → see what we found → get roasted.
+ * youtube and roasts come from Hero, which shares them with the roast showcase.
  */
-function HeroActions() {
+function HeroActions({ youtube, roasts }) {
   const { status: authStatus, user } = useAuth()
-  const youtube = useYouTubeConnection(authStatus)
   const firstName = user?.displayName.split(' ')[0]
 
   const isLoading = authStatus === 'loading' || (authStatus === 'signedIn' && ['idle', 'checking'].includes(youtube.status))
@@ -100,17 +99,32 @@ function HeroActions() {
     )
   }
 
+  const isGenerating = roasts.status === 'generating'
+
   return (
     <>
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-        {/* Disabled until roast generation exists, so the button never pretends to work. */}
-        <button type="button" disabled aria-describedby="cta-note" className={`${redButton} disabled:cursor-not-allowed disabled:opacity-60`}>
-          <FlameIcon className="size-5" />
-          Roast my YouTube
+        <button
+          type="button"
+          onClick={roasts.generate}
+          disabled={isGenerating}
+          aria-describedby="cta-note"
+          className={`${redButton} disabled:cursor-wait disabled:opacity-70`}
+        >
+          <FlameIcon className={`size-5 ${isGenerating ? 'animate-pulse' : ''}`} />
+          {isGenerating ? 'Roasting…' : roasts.latest ? 'Roast me again' : 'Roast my YouTube'}
         </button>
         <SampleLink />
       </div>
-      <Note>Your roast is almost ready to be written. That&apos;s the next feature on the way.</Note>
+      <Note>
+        {roasts.error ? (
+          <span role="alert" className="text-accent">
+            {roasts.error.message}
+          </span>
+        ) : (
+          'Takes a few seconds. Only the summary under "What the AI will see" is sent to the AI.'
+        )}
+      </Note>
       <YouTubeSummaryCard summary={youtube.summary} onDisconnect={youtube.disconnect} />
     </>
   )

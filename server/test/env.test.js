@@ -9,6 +9,7 @@ const validEnv = {
   GOOGLE_REDIRECT_URI: 'http://localhost:5173/api/auth/google/callback',
   CLIENT_URL: 'http://localhost:5173',
   SESSION_SECRET: 'x'.repeat(32),
+  NVIDIA_API_KEY: 'nvapi-test-key-not-real',
 }
 
 const without = (key) => {
@@ -43,7 +44,15 @@ describe('loadEnv', () => {
     expect(Object.isFrozen(loadEnv(validEnv))).toBe(true)
   })
 
-  it.each(['MONGO_URI', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REDIRECT_URI', 'CLIENT_URL', 'SESSION_SECRET'])(
+  it.each([
+    'MONGO_URI',
+    'GOOGLE_CLIENT_ID',
+    'GOOGLE_CLIENT_SECRET',
+    'GOOGLE_REDIRECT_URI',
+    'CLIENT_URL',
+    'SESSION_SECRET',
+    'NVIDIA_API_KEY',
+  ])(
     'requires %s',
     (key) => {
       expect(() => loadEnv(without(key))).toThrow(new RegExp(`${key}: is required`))
@@ -92,6 +101,21 @@ describe('loadEnv', () => {
       expect(() => loadEnv({ ...validEnv, GOOGLE_REDIRECT_URI: 'localhost:5173/callback' })).toThrow(
         /GOOGLE_REDIRECT_URI/,
       )
+    })
+
+    it('rejects an NVIDIA key with the wrong prefix without echoing it', () => {
+      expect(() => loadEnv({ ...validEnv, NVIDIA_API_KEY: 'sk-looks-like-another-provider' })).toThrow(
+        expect.objectContaining({
+          message: expect.stringMatching(/NVIDIA_API_KEY: must be an NVIDIA API key/),
+        }),
+      )
+      expect(() => loadEnv({ ...validEnv, NVIDIA_API_KEY: 'sk-looks-like-another-provider' })).toThrow(
+        expect.objectContaining({ message: expect.not.stringContaining('sk-looks-like') }),
+      )
+    })
+
+    it('defaults NVIDIA_MODEL', () => {
+      expect(loadEnv(validEnv).NVIDIA_MODEL).toBe('nvidia/nemotron-3.5-super-vl-120b-a12b')
     })
 
     it('normalizes CLIENT_URL to its origin (drops a trailing slash)', () => {

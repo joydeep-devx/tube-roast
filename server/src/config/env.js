@@ -36,6 +36,10 @@ const envSchema = z.object({
   CLIENT_URL: httpUrl().transform((value) => new URL(value).origin),
   // Signs session cookies and encrypts session data. Long and random: see README.
   SESSION_SECRET: requiredString().min(32, 'must be at least 32 characters'),
+
+  // Hosted LLM used to write roasts. Server-side only: never expose this to the client.
+  NVIDIA_API_KEY: requiredString().refine((value) => value.startsWith('nvapi-'), 'must be an NVIDIA API key (starts with nvapi-)'),
+  NVIDIA_MODEL: z.string().trim().min(1).default('nvidia/nemotron-3.5-super-vl-120b-a12b'),
 })
 
 /**

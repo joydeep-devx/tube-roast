@@ -2,25 +2,36 @@ import express from 'express'
 import helmet from 'helmet'
 import { createSessionMiddleware } from './config/session.js'
 import { createAuthController } from './controllers/auth.controller.js'
+import { createRoastController } from './controllers/roast.controller.js'
 import { createYouTubeController } from './controllers/youtube.controller.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
-import { createAuthRateLimiter } from './middleware/rateLimit.js'
+import { createAuthRateLimiter, createRoastRateLimiter } from './middleware/rateLimit.js'
 import { createRequireAuth } from './middleware/requireAuth.js'
 import { verifyOrigin } from './middleware/verifyOrigin.js'
 import { createAuthRouter } from './routes/auth.routes.js'
 import { healthRouter } from './routes/health.routes.js'
+import { createRoastRouter } from './routes/roast.routes.js'
 import { createYouTubeRouter } from './routes/youtube.routes.js'
 
 /**
  * Builds the Express app without starting a server, so tests can send it requests in memory.
  *
- * Dependencies are passed in rather than imported: server.js passes the real Google and YouTube
+ * Dependencies are passed in rather than imported: server.js passes the real Google, YouTube and LLM
  * clients, MongoDB-backed services and session store; tests pass fakes and an in-memory store.
  *
  * Middleware order matters: requests flow top to bottom, errors skip ahead to errorHandler.
  */
-export function createApp({ config, googleAuth, youtubeClient, userService, sessionStore }) {
+export function createApp({
+  config,
+  googleAuth,
+  youtubeClient,
+  roastGenerator,
+  roastService,
+  userService,
+  sessionStore,
+  roastRateLimiter = createRoastRateLimiter(),
+}) {
   const app = express()
 
   // Security headers, and removes the X-Powered-By header that advertises Express.
@@ -51,6 +62,15 @@ export function createApp({ config, googleAuth, youtubeClient, userService, sess
       controller: createYouTubeController({ googleAuth, youtubeClient }),
       requireAuth,
       rateLimiter: oauthRateLimiter,
+    }),
+  )
+
+  app.use(
+    '/api/roasts',
+    createRoastRouter({
+      controller: createRoastController({ youtubeClient, roastGenerator, roastService }),
+      requireAuth,
+      roastRateLimiter,
     }),
   )
 

@@ -27,7 +27,8 @@ function DataPromise() {
           Your data, plainly
         </h2>
         <p className="mt-2 max-w-2xl text-muted">
-          TubeRoast asks for read-only YouTube access, and only when you ask for a roast.
+          TubeRoast asks for read-only YouTube access, and only when you ask for a roast. Roasts are written by an AI
+          model hosted by NVIDIA, which receives only a short summary of your activity.
         </p>
       </m.div>
 

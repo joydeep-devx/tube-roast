@@ -2,7 +2,10 @@ import { createApp } from './app.js'
 import { connectToDatabase, disconnectFromDatabase, redactConnectionString } from './config/database.js'
 import { loadEnv } from './config/env.js'
 import { createSessionStore } from './config/session.js'
+import { createNvidiaProvider } from './llm/nvidiaProvider.js'
+import { createRoastGenerator } from './roast/roastGenerator.js'
 import { createGoogleAuth } from './services/googleAuth.js'
+import { roastService } from './services/roastService.js'
 import { createYouTubeClient } from './services/youtubeClient.js'
 import { userService } from './services/userService.js'
 
@@ -35,6 +38,10 @@ const app = createApp({
     redirectUri: env.GOOGLE_REDIRECT_URI,
   }),
   youtubeClient: createYouTubeClient(),
+  roastGenerator: createRoastGenerator({
+    provider: createNvidiaProvider({ apiKey: env.NVIDIA_API_KEY, model: env.NVIDIA_MODEL }),
+  }),
+  roastService,
   userService,
   sessionStore: createSessionStore({ secret: env.SESSION_SECRET }),
 })
