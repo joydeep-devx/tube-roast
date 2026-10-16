@@ -3,6 +3,11 @@ import { z } from 'zod'
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().min(1).max(65535).default(5000),
+  MONGO_URI: z
+    .string({ error: 'is required' })
+    .trim()
+    .min(1, { error: 'is required', abort: true })
+    .refine((value) => /^mongodb(\+srv)?:\/\//.test(value), 'must start with mongodb:// or mongodb+srv://'),
 })
 
 /**

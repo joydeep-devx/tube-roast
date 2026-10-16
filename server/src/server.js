@@ -1,4 +1,5 @@
 import { createApp } from './app.js'
+import { connectToDatabase, disconnectFromDatabase, redactConnectionString } from './config/database.js'
 import { loadEnv } from './config/env.js'
 
 let env
@@ -6,6 +7,15 @@ try {
   env = loadEnv()
 } catch (error) {
   console.error(error.message)
+  process.exit(1)
+}
+
+try {
+  await connectToDatabase(env.MONGO_URI)
+  console.log('Connected to MongoDB')
+} catch (error) {
+  console.error(`Could not connect to MongoDB: ${redactConnectionString(error.message)}`)
+  console.error('Check MONGO_URI in server/.env and that your IP is allowed in Atlas Network Access.')
   process.exit(1)
 }
 
@@ -24,10 +34,13 @@ server.on('error', (error) => {
   process.exit(1)
 })
 
-// Finish in-flight requests before exiting (Ctrl+C locally, SIGTERM from hosting platforms).
+// Finish in-flight requests, then close the database (Ctrl+C locally, SIGTERM from hosting platforms).
 function shutdown(signal) {
   console.log(`${signal} received, shutting down...`)
-  server.close(() => process.exit(0))
+  server.close(async () => {
+    await disconnectFromDatabase()
+    process.exit(0)
+  })
 }
 
 process.on('SIGINT', () => shutdown('SIGINT'))
