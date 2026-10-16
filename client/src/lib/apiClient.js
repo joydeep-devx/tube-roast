@@ -1,8 +1,10 @@
 export class ApiError extends Error {
-  constructor(status, message) {
+  constructor(status, message, code) {
     super(message)
     this.name = 'ApiError'
     this.status = status
+    // Machine-readable reason from the server, e.g. 'YOUTUBE_NOT_CONNECTED'.
+    this.code = code
   }
 }
 
@@ -26,7 +28,7 @@ export async function apiRequest(path, { method = 'GET', body, signal } = {}) {
   const data = await response.json().catch(() => null)
 
   if (!response.ok) {
-    throw new ApiError(response.status, data?.error?.message ?? 'Something went wrong')
+    throw new ApiError(response.status, data?.error?.message ?? 'Something went wrong', data?.error?.code)
   }
 
   return data

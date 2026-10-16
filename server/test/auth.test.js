@@ -54,7 +54,7 @@ describe('Google sign-in', () => {
 
       expect(res.status).toBe(302)
       expect(res.headers.location).toBe(`${TEST_CLIENT_URL}/`)
-      expect(googleAuth.getProfileFromCode).toHaveBeenCalledWith({ code: 'auth-code', codeVerifier: FAKE_VERIFIER })
+      expect(googleAuth.exchangeCode).toHaveBeenCalledWith({ code: 'auth-code', codeVerifier: FAKE_VERIFIER })
       expect(userService.users.size).toBe(1)
 
       const sessionAfter = getCookie(res, SESSION_COOKIE_NAME).value
@@ -68,7 +68,7 @@ describe('Google sign-in', () => {
       const res = await request(app).get(callbackUrl({ code: 'auth-code', state: FAKE_STATE }))
 
       expect(res.headers.location).toBe(`${TEST_CLIENT_URL}/?authError=failed`)
-      expect(googleAuth.getProfileFromCode).not.toHaveBeenCalled()
+      expect(googleAuth.exchangeCode).not.toHaveBeenCalled()
     })
 
     it('rejects a mismatched state', async () => {
@@ -79,7 +79,7 @@ describe('Google sign-in', () => {
       const res = await agent.get(callbackUrl({ code: 'auth-code', state: 'attacker-state' }))
 
       expect(res.headers.location).toBe(`${TEST_CLIENT_URL}/?authError=failed`)
-      expect(googleAuth.getProfileFromCode).not.toHaveBeenCalled()
+      expect(googleAuth.exchangeCode).not.toHaveBeenCalled()
     })
 
     it('rejects a missing code', async () => {
@@ -90,7 +90,7 @@ describe('Google sign-in', () => {
       const res = await agent.get(callbackUrl({ state: FAKE_STATE }))
 
       expect(res.headers.location).toBe(`${TEST_CLIENT_URL}/?authError=failed`)
-      expect(googleAuth.getProfileFromCode).not.toHaveBeenCalled()
+      expect(googleAuth.exchangeCode).not.toHaveBeenCalled()
     })
 
     it('rejects a replayed callback (state is single use)', async () => {
@@ -107,7 +107,7 @@ describe('Google sign-in', () => {
         .set('Cookie', preLoginCookie)
 
       expect(res.headers.location).toBe(`${TEST_CLIENT_URL}/?authError=failed`)
-      expect(googleAuth.getProfileFromCode).toHaveBeenCalledOnce()
+      expect(googleAuth.exchangeCode).toHaveBeenCalledOnce()
     })
 
     it('rejects a sign-in that took longer than 10 minutes', async () => {
@@ -120,7 +120,7 @@ describe('Google sign-in', () => {
       const res = await agent.get(callbackUrl({ code: 'auth-code', state: FAKE_STATE }))
 
       expect(res.headers.location).toBe(`${TEST_CLIENT_URL}/?authError=failed`)
-      expect(googleAuth.getProfileFromCode).not.toHaveBeenCalled()
+      expect(googleAuth.exchangeCode).not.toHaveBeenCalled()
     })
 
     it('reports a cancelled consent screen as "denied"', async () => {
@@ -135,13 +135,13 @@ describe('Google sign-in', () => {
     it('reports a failed token exchange as "failed" without leaking details', async () => {
       const { app, googleAuth } = createTestApp()
       const logSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      googleAuth.getProfileFromCode.mockRejectedValueOnce(new Error('invalid_grant'))
+      googleAuth.exchangeCode.mockRejectedValueOnce(new Error('invalid_grant'))
       const { agent } = await startSignIn(app)
 
       const res = await agent.get(callbackUrl({ code: 'auth-code', state: FAKE_STATE }))
 
       expect(res.headers.location).toBe(`${TEST_CLIENT_URL}/?authError=failed`)
-      expect(logSpy).toHaveBeenCalledWith('[auth] Google sign-in failed:', 'invalid_grant')
+      expect(logSpy).toHaveBeenCalledWith('[auth] Google callback failed:', 'invalid_grant')
     })
   })
 

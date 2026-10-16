@@ -2,17 +2,19 @@
 
 TubeRoast connects to your Google account, looks at the YouTube data Google lets it read, and generates a personalized, good-natured roast of your taste using an LLM.
 
-> **Status:** early development. Google sign-in works; YouTube analysis and roasts are next.
+> **Status:** early development. Google sign-in and read-only YouTube connection work; analysis and roasts are next.
 
 ## What data TubeRoast uses
 
 **Signing in** asks Google only for your name and profile picture (`openid profile`). TubeRoast stores your Google account ID, name and avatar URL. No email, and no Google tokens.
 
-**Roasting** will separately request **read-only** YouTube access (`youtube.readonly`) only when you ask for a roast. It can see:
+**Connecting YouTube** is a separate, optional step that requests **read-only** access (`youtube.readonly`). TubeRoast then reads:
 
-- Videos you have liked (the most recent 1,000 at most, as limited by the YouTube Data API)
-- Channels you subscribe to
-- Playlists you have created
+- Your 200 most recently liked videos (title, channel, category, tags, topics, length)
+- Up to 200 channels you subscribe to
+- Up to 50 playlists you created (titles and item counts)
+
+This data is fetched from YouTube when needed and is **not stored**. The short-lived (about 1 hour) access token is kept only in your encrypted server-side session, never in the browser. Disconnecting or signing out revokes it at Google.
 
 It **cannot** see your watch history. The YouTube Data API has not exposed watch history since 2016.
 
@@ -24,7 +26,7 @@ Only an aggregated summary (top channels, topics and counts) is sent to the LLM.
 | -------- | ------------------------------------------------- |
 | Frontend | React, Vite, Tailwind CSS, Motion                 |
 | Backend  | Node.js, Express, Zod, MongoDB + Mongoose, express-session |
-| Services | Google OAuth 2.0; YouTube Data API v3 and NVIDIA hosted LLM API *(planned)* |
+| Services | Google OAuth 2.0, YouTube Data API v3; NVIDIA hosted LLM API *(planned)* |
 
 ## Project structure
 
@@ -42,7 +44,7 @@ Requirements: Node.js `>=22.12.0` (developed on Node 24), npm, a MongoDB databas
 
 1. Create a project at https://console.cloud.google.com and enable **YouTube Data API v3**.
 2. In **Google Auth Platform**, set up Branding, choose **External** audience, keep the app in **Testing**, and add your Google account under **Audience → Test users**.
-3. Under **Data Access**, add the `openid` and `.../auth/userinfo.profile` scopes.
+3. Under **Data Access**, add the `openid`, `.../auth/userinfo.profile` and `.../auth/youtube.readonly` scopes. The YouTube scope is listed as *sensitive*; that is fine while the app is in Testing.
 4. Under **Clients**, create a **Web application** client with the authorized redirect URI `http://localhost:5173/api/auth/google/callback`.
 5. Copy the client ID and secret into `server/.env`. The secret is shown only once.
 

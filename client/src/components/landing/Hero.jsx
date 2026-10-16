@@ -1,44 +1,13 @@
 import { useReducedMotion } from 'motion/react'
 import * as m from 'motion/react-m'
-import { useAuth } from '../../auth/useAuth.js'
 import { fadeUp, fadeUpScale, staggerContainer } from '../../lib/motion.js'
 import { sampleRoast } from '../../mocks/sampleRoast.js'
-import GoogleSignInButton from '../GoogleSignInButton.jsx'
 import { FlameIcon } from '../Icons.jsx'
+import HeroActions from './HeroActions.jsx'
 import RoastPreviewCard from './RoastPreviewCard.jsx'
-
-const CTA_NOTES = {
-  signedOut: () => 'Sign-in only shares your name and profile picture. YouTube access is asked for separately, later.',
-  error: () => "We couldn't reach the TubeRoast server. Please try again in a moment.",
-  signedIn: (user) => `Hi ${user.displayName.split(' ')[0]}! Connecting YouTube is the next feature on the way.`,
-}
-
-function PrimaryAction({ status }) {
-  if (status === 'loading') {
-    return <span aria-hidden="true" className="block h-12 w-60 animate-pulse rounded-full bg-surface-raised" />
-  }
-
-  if (status !== 'signedIn') {
-    return <GoogleSignInButton size="lg" />
-  }
-
-  return (
-    // Disabled until YouTube access exists, so the button never pretends to work.
-    <button
-      type="button"
-      disabled
-      aria-describedby="cta-note"
-      className="inline-flex items-center justify-center gap-2 rounded-full bg-accent-strong px-6 py-3 font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      <FlameIcon className="size-5" />
-      Roast my YouTube
-    </button>
-  )
-}
 
 function Hero() {
   const prefersReducedMotion = useReducedMotion()
-  const { status, user } = useAuth()
 
   return (
     <section
@@ -71,20 +40,9 @@ function Hero() {
           patterns you&apos;d rather not admit, and serves up a personalized roast.
         </m.p>
 
-        <m.div variants={fadeUp} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <PrimaryAction status={status} />
-          <m.a
-            href="#sample"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="inline-flex items-center justify-center rounded-full border border-border px-6 py-3 font-semibold transition-colors hover:bg-surface-raised"
-          >
-            See a sample roast
-          </m.a>
+        <m.div variants={fadeUp}>
+          <HeroActions />
         </m.div>
-        <m.p variants={fadeUp} id="cta-note" className="mt-3 min-h-5 text-sm text-muted">
-          {CTA_NOTES[status]?.(user)}
-        </m.p>
       </m.div>
 
       <m.div

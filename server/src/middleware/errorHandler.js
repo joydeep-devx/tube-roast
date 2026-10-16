@@ -8,8 +8,8 @@ function resolveStatus(err) {
 /**
  * Last middleware in the chain. Express recognizes it as an error handler because it takes 4 arguments.
  *
- * Clients get a consistent `{ error: { message } }` shape. Only errors marked `expose`
- * (our AppErrors and body-parser's 4xx errors) reveal their message; everything else
+ * Clients get a consistent `{ error: { message, code? } }` shape. Only errors marked `expose`
+ * (our AppErrors and body-parser's 4xx errors) reveal their message and code; everything else
  * gets a generic message so internals and stack traces never leak.
  */
 export function errorHandler(err, req, res, next) {
@@ -18,12 +18,16 @@ export function errorHandler(err, req, res, next) {
   }
 
   const status = resolveStatus(err)
-  const message = err.expose === true && status < 500 ? err.message : GENERIC_MESSAGE
+  const isExposed = err.expose === true
+  const body = { message: isExposed ? err.message : GENERIC_MESSAGE }
+  if (isExposed && typeof err.code === 'string') {
+    body.code = err.code
+  }
 
-  if (status >= 500) {
+  if (status >= 500 && !isExposed) {
     // Full details stay in server logs. Request bodies and headers are not logged because they may hold secrets.
     console.error(`[error] ${req.method} ${req.originalUrl}`, err)
   }
 
-  res.status(status).json({ error: { message } })
+  res.status(status).json({ error: body })
 }

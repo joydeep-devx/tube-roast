@@ -36,3 +36,22 @@ describe('createGoogleAuth().createAuthRequest', () => {
     expect(first.state.length).toBeGreaterThanOrEqual(43) // 32 random bytes, base64url
   })
 })
+
+describe('createGoogleAuth().createYouTubeAuthRequest', () => {
+  it('asks only for read-only YouTube access, on top of existing grants', async () => {
+    const { url, state } = await googleAuth.createYouTubeAuthRequest({ loginHint: '109876543210987654321' })
+    const params = new URL(url).searchParams
+
+    expect(params.get('scope')).toBe('https://www.googleapis.com/auth/youtube.readonly')
+    expect(params.get('include_granted_scopes')).toBe('true')
+    expect(params.get('access_type')).toBe('online')
+    expect(params.get('login_hint')).toBe('109876543210987654321')
+    expect(params.get('state')).toBe(state)
+    expect(params.get('code_challenge_method')).toBe('S256')
+  })
+
+  it('omits login_hint when none is given', async () => {
+    const { url } = await googleAuth.createYouTubeAuthRequest()
+    expect(new URL(url).searchParams.has('login_hint')).toBe(false)
+  })
+})

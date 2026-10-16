@@ -3,6 +3,7 @@ import { connectToDatabase, disconnectFromDatabase, redactConnectionString } fro
 import { loadEnv } from './config/env.js'
 import { createSessionStore } from './config/session.js'
 import { createGoogleAuth } from './services/googleAuth.js'
+import { createYouTubeClient } from './services/youtubeClient.js'
 import { userService } from './services/userService.js'
 
 let env
@@ -33,6 +34,7 @@ const app = createApp({
     clientSecret: env.GOOGLE_CLIENT_SECRET,
     redirectUri: env.GOOGLE_REDIRECT_URI,
   }),
+  youtubeClient: createYouTubeClient(),
   userService,
   sessionStore: createSessionStore({ secret: env.SESSION_SECRET }),
 })

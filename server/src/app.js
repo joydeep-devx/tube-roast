@@ -2,6 +2,7 @@ import express from 'express'
 import helmet from 'helmet'
 import { createSessionMiddleware } from './config/session.js'
 import { createAuthController } from './controllers/auth.controller.js'
+import { createYouTubeController } from './controllers/youtube.controller.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
 import { createAuthRateLimiter } from './middleware/rateLimit.js'
@@ -9,16 +10,17 @@ import { createRequireAuth } from './middleware/requireAuth.js'
 import { verifyOrigin } from './middleware/verifyOrigin.js'
 import { createAuthRouter } from './routes/auth.routes.js'
 import { healthRouter } from './routes/health.routes.js'
+import { createYouTubeRouter } from './routes/youtube.routes.js'
 
 /**
  * Builds the Express app without starting a server, so tests can send it requests in memory.
  *
- * Dependencies are passed in rather than imported: server.js passes the real Google client,
- * MongoDB-backed services and session store; tests pass fakes and an in-memory store.
+ * Dependencies are passed in rather than imported: server.js passes the real Google and YouTube
+ * clients, MongoDB-backed services and session store; tests pass fakes and an in-memory store.
  *
  * Middleware order matters: requests flow top to bottom, errors skip ahead to errorHandler.
  */
-export function createApp({ config, googleAuth, userService, sessionStore }) {
+export function createApp({ config, googleAuth, youtubeClient, userService, sessionStore }) {
   const app = express()
 
   // Security headers, and removes the X-Powered-By header that advertises Express.
@@ -37,13 +39,18 @@ export function createApp({ config, googleAuth, userService, sessionStore }) {
     isProduction: config.isProduction,
   })
 
+  const requireAuth = createRequireAuth(userService)
+  // One limiter shared by every route that redirects to Google.
+  const oauthRateLimiter = createAuthRateLimiter()
+
   app.use('/api/health', healthRouter)
+  app.use('/api/auth', createAuthRouter({ controller: authController, requireAuth, rateLimiter: oauthRateLimiter }))
   app.use(
-    '/api/auth',
-    createAuthRouter({
-      controller: authController,
-      requireAuth: createRequireAuth(userService),
-      rateLimiter: createAuthRateLimiter(),
+    '/api/youtube',
+    createYouTubeRouter({
+      controller: createYouTubeController({ googleAuth, youtubeClient }),
+      requireAuth,
+      rateLimiter: oauthRateLimiter,
     }),
   )
 
