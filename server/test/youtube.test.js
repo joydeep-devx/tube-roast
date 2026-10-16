@@ -124,8 +124,14 @@ describe('YouTube connection', () => {
           { title: 'Lofi beats', channelTitle: 'Lofi Beats to Procrastinate To' },
         ],
         limits: { likedVideos: 200, subscriptions: 200, playlists: 50 },
+        profile: expect.objectContaining({
+          totals: { likedVideos: 2, subscriptions: 1, playlists: 1 },
+          topChannels: expect.any(Array),
+          traits: expect.any(Array),
+        }),
       })
       expect(res.text).not.toContain(FAKE_ACCESS_TOKEN)
+      expect(JSON.stringify(res.body.profile)).not.toMatch(/vid1|vid2/) // no video IDs in the profile
     })
 
     it('returns YOUTUBE_NOT_CONNECTED when not connected', async () => {

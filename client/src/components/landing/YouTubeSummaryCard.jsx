@@ -2,6 +2,7 @@ import * as m from 'motion/react-m'
 import { useState } from 'react'
 import { fadeUp, staggerContainer } from '../../lib/motion.js'
 import { CheckIcon } from '../Icons.jsx'
+import ProfileInsights from './ProfileInsights.jsx'
 
 const STATS = [
   { key: 'likedVideos', label: 'liked videos' },
@@ -76,6 +77,8 @@ function YouTubeSummaryCard({ summary, onDisconnect }) {
           </ul>
         </m.div>
       )}
+
+      {summary.profile && <ProfileInsights profile={summary.profile} />}
 
       <m.p variants={fadeUp} className="mt-4 text-xs text-muted">
         Read fresh from YouTube just now and not stored. Roasts arrive in the next update.

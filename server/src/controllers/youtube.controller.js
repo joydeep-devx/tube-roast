@@ -1,3 +1,4 @@
+import { buildRoastProfile } from '../analysis/buildRoastProfile.js'
 import { saveSession } from '../config/session.js'
 import { normalizeActivity, summarizeActivity } from '../services/youtubeActivity.js'
 import { FETCH_LIMITS } from '../services/youtubeClient.js'
@@ -21,12 +22,17 @@ export function createYouTubeController({ googleAuth, youtubeClient }) {
       res.json({ connected: Boolean(connection), expiresAt: connection?.expiresAt ?? null })
     },
 
-    // GET /api/youtube/activity (behind requireYouTube): fetch, normalize, summarize. Nothing is stored.
+    // GET /api/youtube/activity (behind requireYouTube): fetch, normalize, summarize, analyze. Nothing is stored.
+    // `profile` is exactly what the roast generator will send to the LLM, shown to the user for transparency.
     async getActivity(req, res) {
       try {
         const raw = await youtubeClient.fetchActivity(req.youtubeAccessToken)
         const activity = normalizeActivity(raw)
-        res.json({ ...summarizeActivity(activity), limits: FETCH_LIMITS })
+        res.json({
+          ...summarizeActivity(activity),
+          limits: FETCH_LIMITS,
+          profile: buildRoastProfile(activity, { limits: FETCH_LIMITS }),
+        })
       } catch (error) {
         // Google rejected the token (revoked from the Google account page, for example): forget it.
         if (error.code === 'YOUTUBE_NOT_CONNECTED') {
