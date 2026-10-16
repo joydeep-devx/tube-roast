@@ -36,17 +36,18 @@ function RoastHistoryCard({ roast, onDelete }) {
         </div>
       </Link>
 
-      {roast.snapshot.traits.length > 0 && (
-        <ul aria-label="Traits" className="mt-2 flex flex-wrap gap-1.5">
-          {roast.snapshot.traits.slice(0, 3).map((trait) => (
-            <li key={trait} className="rounded-full bg-surface-raised px-2 py-0.5 text-xs text-muted">
-              {traitLabel(trait)}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <div className="mt-3">
+      {/* Footer: the grid stretches every card in a row to the tallest one; mt-auto gives the leftover
+          height to the space above the footer, so chips and Delete line up across cards. pt-3 keeps a minimum gap. */}
+      <div data-testid="roast-card-footer" className="mt-auto pt-3">
+        {roast.snapshot.traits.length > 0 && (
+          <ul aria-label="Traits" className="mb-3 flex flex-wrap gap-1.5">
+            {roast.snapshot.traits.slice(0, 3).map((trait) => (
+              <li key={trait} className="rounded-full bg-surface-raised px-2 py-0.5 text-xs text-muted">
+                {traitLabel(trait)}
+              </li>
+            ))}
+          </ul>
+        )}
         <DeleteRoastButton onDelete={onDelete} />
       </div>
     </m.li>

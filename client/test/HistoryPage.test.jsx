@@ -22,6 +22,21 @@ describe('HistoryPage', () => {
     expect(screen.getAllByText('5 minutes ago')).toHaveLength(2)
   })
 
+  it('keeps traits and Delete in a bottom-pinned footer so they align across cards', async () => {
+    mockApi({ '/api/roasts': jsonResponse({ roasts }) })
+    renderWithProviders(<HistoryPage />, { route: '/history' })
+    await screen.findByRole('link', { name: /Speedrunner of Sadness/ })
+
+    // jsdom can't measure layout, so this guards the structure; alignment itself was checked in a browser.
+    const footers = screen.getAllByTestId('roast-card-footer')
+    expect(footers).toHaveLength(2)
+    for (const footer of footers) {
+      expect(footer.className).toContain('mt-auto')
+      expect(within(footer).getByRole('button', { name: 'Delete' })).toBeTruthy()
+    }
+    expect(within(footers[0]).getByRole('list', { name: 'Traits' })).toBeTruthy()
+  })
+
   it('shows an empty state with a way to get roasted', async () => {
     mockApi({ '/api/roasts': jsonResponse({ roasts: [] }) })
     renderWithProviders(<HistoryPage />, { route: '/history' })
