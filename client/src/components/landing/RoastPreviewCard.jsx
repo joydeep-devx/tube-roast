@@ -1,0 +1,59 @@
+import { FlameIcon } from '../Icons.jsx'
+
+// Presents a roast the way YouTube presents a video: thumbnail, title, meta line.
+function RoastPreviewCard({ roast }) {
+  return (
+    <article
+      aria-labelledby="sample-roast-title"
+      className="overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl shadow-black/40"
+    >
+      <div className="relative aspect-video bg-gradient-to-br from-accent-strong via-[#5c0f16] to-surface-raised p-5">
+        <span className="absolute top-3 left-3 rounded bg-black/70 px-2 py-0.5 text-xs font-semibold tracking-wide uppercase">
+          Sample
+        </span>
+        <p
+          aria-hidden="true"
+          className="flex h-full items-center justify-center text-center text-2xl leading-tight font-extrabold text-balance sm:text-3xl"
+        >
+          {roast.title}
+        </p>
+        <span className="absolute right-3 bottom-3 rounded bg-black/80 px-1.5 py-0.5 text-xs font-medium">
+          <span className="sr-only">Length </span>
+          {roast.durationLabel}
+        </span>
+        <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1 bg-white/20">
+          <span className="block h-full w-2/3 bg-accent-hover" />
+        </span>
+      </div>
+
+      <div className="flex gap-3 p-4 sm:p-5">
+        <span
+          aria-hidden="true"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-raised"
+        >
+          <FlameIcon className="size-5 text-accent" />
+        </span>
+        <div className="min-w-0">
+          <h2 id="sample-roast-title" className="leading-snug font-semibold">
+            {roast.title}
+          </h2>
+          <p className="mt-1 text-sm text-muted">
+            TubeRoast · {roast.likedVideoCount} liked videos · {roast.subscriptionCount} subscriptions
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-ink/90">{roast.roast}</p>
+
+          <h3 className="sr-only">Top channels</h3>
+          <ul className="mt-4 flex flex-wrap gap-2">
+            {roast.topChannels.map((channel) => (
+              <li key={channel} className="rounded-lg bg-surface-raised px-2.5 py-1 text-xs text-ink/90">
+                {channel}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </article>
+  )
+}
+
+export default RoastPreviewCard
