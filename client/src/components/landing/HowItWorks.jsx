@@ -1,3 +1,6 @@
+import * as m from 'motion/react-m'
+import { fadeUp, hoverLift, revealOnScroll, staggerContainer } from '../../lib/motion.js'
+
 // Styled like the chapter list under a YouTube video.
 const chapters = [
   {
@@ -25,28 +28,37 @@ function HowItWorks() {
       className="scroll-mt-16 border-t border-border/60 bg-surface/40"
     >
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-        <h2 id="how-heading" className="text-3xl font-bold tracking-tight">
-          How it works
-        </h2>
-        <p className="mt-2 text-muted">Three chapters. No skipping.</p>
+        <m.div variants={fadeUp} {...revealOnScroll}>
+          <h2 id="how-heading" className="text-3xl font-bold tracking-tight">
+            How it works
+          </h2>
+          <p className="mt-2 text-muted">Three chapters. No skipping.</p>
+        </m.div>
 
-        <ol className="mt-10 grid gap-6 md:grid-cols-3">
+        <m.ol variants={staggerContainer(0.12)} {...revealOnScroll} className="mt-10 grid gap-6 md:grid-cols-3">
           {chapters.map((chapter, index) => (
-            <li key={chapter.timestamp} className="rounded-2xl border border-border bg-surface p-5">
+            <m.li
+              key={chapter.timestamp}
+              variants={fadeUp}
+              {...hoverLift}
+              className="group rounded-2xl border border-border bg-surface p-5 transition-colors hover:border-accent/50"
+            >
               <div
                 aria-hidden="true"
                 className="relative flex aspect-video items-center justify-center rounded-xl bg-surface-raised"
               >
-                <span className="text-5xl font-extrabold text-accent">{index + 1}</span>
+                <span className="text-5xl font-extrabold text-accent transition-transform duration-300 group-hover:scale-110">
+                  {index + 1}
+                </span>
                 <span className="absolute right-2 bottom-2 rounded bg-black/80 px-1.5 py-0.5 text-xs font-medium">
                   {chapter.timestamp}
                 </span>
               </div>
               <h3 className="mt-4 font-semibold">{chapter.title}</h3>
               <p className="mt-1 text-sm leading-relaxed text-muted">{chapter.description}</p>
-            </li>
+            </m.li>
           ))}
-        </ol>
+        </m.ol>
       </div>
     </section>
   )

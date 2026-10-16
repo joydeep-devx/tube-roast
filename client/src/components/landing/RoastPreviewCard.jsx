@@ -1,9 +1,12 @@
+import * as m from 'motion/react-m'
+import { hoverLift } from '../../lib/motion.js'
 import { FlameIcon } from '../Icons.jsx'
 
 // Presents a roast the way YouTube presents a video: thumbnail, title, meta line.
 function RoastPreviewCard({ roast }) {
   return (
-    <article
+    <m.article
+      {...hoverLift}
       aria-labelledby="sample-roast-title"
       className="overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl shadow-black/40"
     >
@@ -22,7 +25,13 @@ function RoastPreviewCard({ roast }) {
           {roast.durationLabel}
         </span>
         <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1 bg-white/20">
-          <span className="block h-full w-2/3 bg-accent-hover" />
+          {/* scaleX instead of width: transforms animate on the GPU without re-calculating layout. */}
+          <m.span
+            className="block h-full w-full origin-left bg-accent-hover"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 0.66 }}
+            transition={{ delay: 0.9, duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+          />
         </span>
       </div>
 
@@ -52,7 +61,7 @@ function RoastPreviewCard({ roast }) {
           </ul>
         </div>
       </div>
-    </article>
+    </m.article>
   )
 }
 

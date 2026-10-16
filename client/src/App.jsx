@@ -1,8 +1,21 @@
+import { domAnimation, LazyMotion, MotionConfig } from 'motion/react'
 import Footer from './components/Footer.jsx'
 import Header from './components/Header.jsx'
 import LandingPage from './pages/LandingPage.jsx'
 
 function App() {
+  return (
+    // reducedMotion="user": if the OS asks for reduced motion, Motion skips movement and keeps simple fades.
+    // LazyMotion + domAnimation loads only the features we use; `strict` errors if a full `motion.*` component sneaks in.
+    <MotionConfig reducedMotion="user">
+      <LazyMotion features={domAnimation} strict>
+        <AppShell />
+      </LazyMotion>
+    </MotionConfig>
+  )
+}
+
+function AppShell() {
   return (
     <div id="top" className="flex min-h-dvh flex-col">
       {/* Lets keyboard users jump past the header straight to the content. */}
