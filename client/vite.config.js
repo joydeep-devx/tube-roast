@@ -11,4 +11,10 @@ export default defineConfig({
       '/api': 'http://localhost:5000',
     },
   },
+  // Vitest reads this block. jsdom gives tests a simulated browser (document, window, events).
+  test: {
+    environment: 'jsdom',
+    include: ['test/**/*.test.{js,jsx}'],
+    setupFiles: ['./test/setup.js'],
+  },
 })

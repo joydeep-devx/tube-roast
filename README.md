@@ -86,6 +86,7 @@ The app runs at http://localhost:5173. In development, Vite forwards every `/api
 | `client/` | `npm run build`   | Production build into `dist/`             |
 | `client/` | `npm run preview` | Serve the production build                |
 | `client/` | `npm run lint`    | Run oxlint                                |
+| `client/` | `npm test`        | Run the client tests (Vitest + Testing Library + jsdom) |
 | `server/` | `npm run dev`     | Start the API and restart on file changes |
 | `server/` | `npm start`       | Start the API                             |
 | `server/` | `npm test`        | Run the API tests with Vitest             |
