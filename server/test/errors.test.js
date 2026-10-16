@@ -1,7 +1,7 @@
 import express from 'express'
 import request from 'supertest'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createApp } from '../src/app.js'
+import { createTestApp } from './helpers.js'
 import { errorHandler } from '../src/middleware/errorHandler.js'
 import { AppError } from '../src/utils/AppError.js'
 
@@ -27,7 +27,7 @@ describe('error handling', () => {
   })
 
   it('returns a JSON 404 for unknown routes', async () => {
-    const res = await request(createApp()).get('/api/does-not-exist')
+    const res = await request(createTestApp().app).get('/api/does-not-exist')
 
     expect(res.status).toBe(404)
     expect(res.body).toEqual({ error: { message: 'Not found' } })
@@ -62,7 +62,7 @@ describe('error handling', () => {
   })
 
   it('rejects malformed JSON with a 400', async () => {
-    const res = await request(createApp())
+    const res = await request(createTestApp().app)
       .post('/api/health')
       .set('Content-Type', 'application/json')
       .send('{"broken":')
@@ -72,7 +72,7 @@ describe('error handling', () => {
   })
 
   it('rejects JSON bodies over 10kb with a 413', async () => {
-    const res = await request(createApp())
+    const res = await request(createTestApp().app)
       .post('/api/health')
       .set('Content-Type', 'application/json')
       .send(JSON.stringify({ padding: 'x'.repeat(11 * 1024) }))

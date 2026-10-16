@@ -1,13 +1,41 @@
 import { z } from 'zod'
 
-const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().int().min(1).max(65535).default(5000),
-  MONGO_URI: z
+// Every message is fixed text, so a bad value (possibly a secret) is never echoed back.
+const requiredString = () =>
+  z
     .string({ error: 'is required' })
     .trim()
     .min(1, { error: 'is required', abort: true })
-    .refine((value) => /^mongodb(\+srv)?:\/\//.test(value), 'must start with mongodb:// or mongodb+srv://'),
+
+function isHttpUrl(value) {
+  try {
+    return ['http:', 'https:'].includes(new URL(value).protocol)
+  } catch {
+    return false
+  }
+}
+
+const httpUrl = () => requiredString().refine(isHttpUrl, 'must be an http(s) URL')
+
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  PORT: z.coerce.number().int().min(1).max(65535).default(5000),
+  MONGO_URI: requiredString().refine(
+    (value) => /^mongodb(\+srv)?:\/\//.test(value),
+    'must start with mongodb:// or mongodb+srv://',
+  ),
+
+  GOOGLE_CLIENT_ID: requiredString().refine(
+    (value) => value.endsWith('.apps.googleusercontent.com'),
+    'must be an OAuth client ID ending in .apps.googleusercontent.com',
+  ),
+  GOOGLE_CLIENT_SECRET: requiredString(),
+  // Must match an "Authorized redirect URI" in Google Cloud exactly.
+  GOOGLE_REDIRECT_URI: httpUrl(),
+  // Where the React app runs. Used for post-login redirects and the CSRF origin check.
+  CLIENT_URL: httpUrl().transform((value) => new URL(value).origin),
+  // Signs session cookies and encrypts session data. Long and random: see README.
+  SESSION_SECRET: requiredString().min(32, 'must be at least 32 characters'),
 })
 
 /**

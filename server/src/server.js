@@ -1,6 +1,9 @@
 import { createApp } from './app.js'
 import { connectToDatabase, disconnectFromDatabase, redactConnectionString } from './config/database.js'
 import { loadEnv } from './config/env.js'
+import { createSessionStore } from './config/session.js'
+import { createGoogleAuth } from './services/googleAuth.js'
+import { userService } from './services/userService.js'
 
 let env
 try {
@@ -19,7 +22,20 @@ try {
   process.exit(1)
 }
 
-const app = createApp()
+const app = createApp({
+  config: {
+    clientUrl: env.CLIENT_URL,
+    sessionSecret: env.SESSION_SECRET,
+    isProduction: env.NODE_ENV === 'production',
+  },
+  googleAuth: createGoogleAuth({
+    clientId: env.GOOGLE_CLIENT_ID,
+    clientSecret: env.GOOGLE_CLIENT_SECRET,
+    redirectUri: env.GOOGLE_REDIRECT_URI,
+  }),
+  userService,
+  sessionStore: createSessionStore({ secret: env.SESSION_SECRET }),
+})
 
 const server = app.listen(env.PORT, () => {
   console.log(`TubeRoast API listening on http://localhost:${env.PORT} (${env.NODE_ENV})`)

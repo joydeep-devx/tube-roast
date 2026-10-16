@@ -1,4 +1,6 @@
 import { domAnimation, LazyMotion, MotionConfig } from 'motion/react'
+import AuthProvider from './auth/AuthProvider.jsx'
+import AuthErrorBanner from './components/AuthErrorBanner.jsx'
 import Footer from './components/Footer.jsx'
 import Header from './components/Header.jsx'
 import LandingPage from './pages/LandingPage.jsx'
@@ -9,7 +11,9 @@ function App() {
     // LazyMotion + domAnimation loads only the features we use; `strict` errors if a full `motion.*` component sneaks in.
     <MotionConfig reducedMotion="user">
       <LazyMotion features={domAnimation} strict>
-        <AppShell />
+        <AuthProvider>
+          <AppShell />
+        </AuthProvider>
       </LazyMotion>
     </MotionConfig>
   )
@@ -27,6 +31,7 @@ function AppShell() {
       </a>
       <Header />
       <main id="main" className="flex-1">
+        <AuthErrorBanner />
         <LandingPage />
       </main>
       <Footer />
