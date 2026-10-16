@@ -40,13 +40,22 @@ const envSchema = z.object({
   // Hosted LLM used to write roasts. Server-side only: never expose this to the client.
   NVIDIA_API_KEY: requiredString().refine((value) => value.startsWith('nvapi-'), 'must be an NVIDIA API key (starts with nvapi-)'),
   NVIDIA_MODEL: z.string().trim().min(1).default('nvidia/nemotron-3.5-super-vl-120b-a12b'),
+
+  // Set automatically by Render (RENDER is always "true" there). Tells us we're on a real host.
+  RENDER: z.string().optional(),
 }).superRefine((env, ctx) => {
   // Catches dev values copied to the host: production URLs must be HTTPS (Secure cookies, Google's rules).
-  // localhost is exempt: browsers treat it as secure, which allows a local production rehearsal.
+  // localhost is allowed only off-host, for a local production rehearsal; on Render it is always a mistake.
   if (env.NODE_ENV !== 'production') return
+  const isHosted = env.RENDER === 'true'
+
   for (const key of ['CLIENT_URL', 'GOOGLE_REDIRECT_URI']) {
     const { protocol, hostname } = new URL(env[key])
-    if (protocol !== 'https:' && !['localhost', '127.0.0.1'].includes(hostname)) {
+    const isLocalhost = ['localhost', '127.0.0.1'].includes(hostname)
+
+    if (isLocalhost && isHosted) {
+      ctx.addIssue({ code: 'custom', path: [key], message: 'points to localhost, but this server is running on Render: use your public https URL' })
+    } else if (protocol !== 'https:' && !isLocalhost) {
       ctx.addIssue({ code: 'custom', path: [key], message: 'must use https:// in production' })
     }
   }

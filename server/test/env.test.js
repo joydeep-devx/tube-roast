@@ -141,6 +141,20 @@ describe('loadEnv', () => {
       expect(() => loadEnv({ ...validEnv, NODE_ENV: 'production' })).not.toThrow() // validEnv uses localhost
     })
 
+    it('rejects localhost URLs when running on Render, even though they are allowed for a local rehearsal', () => {
+      // Regression: dev values copied to Render passed the https check via the localhost exemption.
+      const onRender = { ...validEnv, NODE_ENV: 'production', RENDER: 'true' }
+      expect(() => loadEnv(onRender)).toThrow(/CLIENT_URL: points to localhost, but this server is running on Render/)
+      expect(() => loadEnv(onRender)).toThrow(/GOOGLE_REDIRECT_URI: points to localhost/)
+      expect(() =>
+        loadEnv({
+          ...onRender,
+          CLIENT_URL: 'https://tube-roast.onrender.com',
+          GOOGLE_REDIRECT_URI: 'https://tube-roast.onrender.com/api/auth/google/callback',
+        }),
+      ).not.toThrow()
+    })
+
     it('normalizes CLIENT_URL to its origin (drops a trailing slash)', () => {
       expect(loadEnv({ ...validEnv, CLIENT_URL: 'http://localhost:5173/' }).CLIENT_URL).toBe('http://localhost:5173')
     })
