@@ -1,9 +1,12 @@
 import { domAnimation, LazyMotion, MotionConfig } from 'motion/react'
+import { BrowserRouter, Route, Routes } from 'react-router'
 import AuthProvider from './auth/AuthProvider.jsx'
-import StatusBanner from './components/StatusBanner.jsx'
-import Footer from './components/Footer.jsx'
-import Header from './components/Header.jsx'
+import RequireAuth from './auth/RequireAuth.jsx'
+import AppLayout from './layouts/AppLayout.jsx'
+import HistoryPage from './pages/HistoryPage.jsx'
 import LandingPage from './pages/LandingPage.jsx'
+import NotFoundPage from './pages/NotFoundPage.jsx'
+import RoastDetailPage from './pages/RoastDetailPage.jsx'
 
 function App() {
   return (
@@ -12,30 +15,34 @@ function App() {
     <MotionConfig reducedMotion="user">
       <LazyMotion features={domAnimation} strict>
         <AuthProvider>
-          <AppShell />
+          <BrowserRouter>
+            <Routes>
+              {/* Layout route: every page renders inside AppLayout's <Outlet />. */}
+              <Route element={<AppLayout />}>
+                <Route index element={<LandingPage />} />
+                <Route
+                  path="history"
+                  element={
+                    <RequireAuth title="Sign in to see your roasts" message="Your roast history is saved to your account.">
+                      <HistoryPage />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="roasts/:id"
+                  element={
+                    <RequireAuth title="Sign in to see this roast" message="Roasts are only visible to the person they roast.">
+                      <RoastDetailPage />
+                    </RequireAuth>
+                  }
+                />
+                <Route path="*" element={<NotFoundPage />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
         </AuthProvider>
       </LazyMotion>
     </MotionConfig>
-  )
-}
-
-function AppShell() {
-  return (
-    <div id="top" className="flex min-h-dvh flex-col">
-      {/* Lets keyboard users jump past the header straight to the content. */}
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-20 focus:rounded-lg focus:bg-surface-raised focus:px-4 focus:py-2"
-      >
-        Skip to content
-      </a>
-      <Header />
-      <main id="main" className="flex-1">
-        <StatusBanner />
-        <LandingPage />
-      </main>
-      <Footer />
-    </div>
   )
 }
 

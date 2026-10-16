@@ -55,7 +55,8 @@ function Hero() {
 
       <m.div
         id="sample"
-        className="relative isolate min-w-0 scroll-mt-24"
+        // Once the YouTube card makes the left column tall, keep the roast near the top while scrolling on desktop.
+        className={`relative isolate min-w-0 scroll-mt-24 ${youtube.status === 'connected' ? 'lg:sticky lg:top-24 lg:self-start' : ''}`}
         initial={fadeUpScale.hidden}
         animate={{ ...fadeUpScale.visible, transition: { ...fadeUpScale.visible.transition, delay: 0.35 } }}
       >

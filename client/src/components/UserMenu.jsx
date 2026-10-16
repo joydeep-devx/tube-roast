@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { NavLink } from 'react-router'
 import { useAuth } from '../auth/useAuth.js'
 import GoogleSignInButton from './GoogleSignInButton.jsx'
 
@@ -48,8 +49,16 @@ function UserMenu() {
 
   return (
     <div className="flex items-center gap-3">
+      <NavLink
+        to="/history"
+        className={({ isActive }) =>
+          `rounded-md px-1 py-1 text-sm font-medium transition-colors hover:text-ink ${isActive ? 'text-ink' : 'text-muted'}`
+        }
+      >
+        History
+      </NavLink>
       <Avatar user={user} />
-      <span className="hidden max-w-40 truncate text-sm font-medium md:inline">{user.displayName}</span>
+      <span className="hidden max-w-40 truncate text-sm font-medium lg:inline">{user.displayName}</span>
       <button
         type="button"
         onClick={handleSignOut}

@@ -5,6 +5,7 @@ import HowItWorks from '../components/landing/HowItWorks.jsx'
 function LandingPage() {
   return (
     <>
+      <title>TubeRoast · Your YouTube taste, roasted</title>
       <Hero />
       <HowItWorks />
       <DataPromise />

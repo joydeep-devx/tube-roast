@@ -11,7 +11,8 @@ function Logo({ size = 'md' }) {
       >
         <PlayIcon className={`ml-0.5 text-white ${isLarge ? 'size-5' : 'size-4'}`} />
       </span>
-      <span className={`font-bold tracking-tight ${isLarge ? 'text-2xl' : 'text-xl'}`}>
+      {/* The wordmark hides on very narrow phones so the header fits; links using the logo keep an aria-label. */}
+      <span className={`hidden font-bold tracking-tight min-[400px]:inline ${isLarge ? 'text-2xl' : 'text-xl'}`}>
         Tube<span className="text-accent">Roast</span>
       </span>
     </span>
