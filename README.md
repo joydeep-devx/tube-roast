@@ -20,8 +20,8 @@ Only an aggregated summary (top channels, topics and counts) is sent to the LLM.
 
 | Layer    | Technology                                        |
 | -------- | ------------------------------------------------- |
-| Frontend | React, Vite, Tailwind CSS                         |
-| Backend  | Node.js, Express, MongoDB, Mongoose *(planned)*   |
+| Frontend | React, Vite, Tailwind CSS, Motion                 |
+| Backend  | Node.js, Express, Zod; MongoDB + Mongoose *(planned)* |
 | Services | Google OAuth 2.0, YouTube Data API v3, NVIDIA hosted LLM API *(planned)* |
 
 ## Project structure
@@ -29,12 +29,27 @@ Only an aggregated summary (top channels, topics and counts) is sent to the LLM.
 ```
 tube-roast/
 ├─ client/   React + Vite frontend
-└─ server/   Express API (coming in a later milestone)
+└─ server/   Express REST API
 ```
 
 ## Getting started
 
-Requirements: Node.js `^20.19.0` or `>=22.12.0` and npm.
+Requirements: Node.js `>=22.12.0` (developed on Node 24) and npm.
+
+Run the API and the client in two terminals.
+
+**1. API server**
+
+```bash
+cd server
+npm install
+cp .env.example .env
+npm run dev
+```
+
+The API runs at http://localhost:5000. Check it with `curl http://localhost:5000/api/health`.
+
+**2. Client**
 
 ```bash
 cd client
@@ -42,12 +57,15 @@ npm install
 npm run dev
 ```
 
-The app runs at http://localhost:5173.
+The app runs at http://localhost:5173. In development, Vite forwards every `/api/*` request to the API server.
 
-Other client scripts:
+### Scripts
 
-| Command           | Purpose                         |
-| ----------------- | ------------------------------- |
-| `npm run build`   | Production build into `dist/`   |
-| `npm run preview` | Serve the production build      |
-| `npm run lint`    | Run ESLint                      |
+| Where     | Command           | Purpose                                   |
+| --------- | ----------------- | ----------------------------------------- |
+| `client/` | `npm run build`   | Production build into `dist/`             |
+| `client/` | `npm run preview` | Serve the production build                |
+| `client/` | `npm run lint`    | Run oxlint                                |
+| `server/` | `npm run dev`     | Start the API and restart on file changes |
+| `server/` | `npm start`       | Start the API                             |
+| `server/` | `npm test`        | Run the API tests with Vitest             |
