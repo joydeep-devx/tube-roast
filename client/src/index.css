@@ -1,0 +1,39 @@
+@import 'tailwindcss';
+
+/*
+  Design tokens. Tailwind v4 turns each --color-* variable into utilities
+  such as bg-surface, text-muted and ring-accent.
+  Text colours were chosen to meet WCAG AA contrast on the dark backgrounds.
+*/
+@theme {
+  --color-canvas: #0f0f0f;
+  --color-surface: #1a1a1a;
+  --color-surface-raised: #272727;
+  --color-border: #3a3a3a;
+
+  --color-ink: #f1f1f1;
+  --color-muted: #aaaaaa;
+
+  /* Red on dark text/borders */
+  --color-accent: #ff4e45;
+  /* Red behind white text (buttons, badges) */
+  --color-accent-strong: #cc1a26;
+  --color-accent-hover: #e5192b;
+
+  --font-sans: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply min-h-dvh bg-canvas font-sans text-ink antialiased;
+  }
+
+  /* Keyboard users always get a visible focus ring; mouse clicks do not. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+}
