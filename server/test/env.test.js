@@ -118,6 +118,29 @@ describe('loadEnv', () => {
       expect(loadEnv(validEnv).NVIDIA_MODEL).toBe('nvidia/nemotron-3.5-super-vl-120b-a12b')
     })
 
+    it('requires https URLs in production', () => {
+      const production = {
+        ...validEnv,
+        NODE_ENV: 'production',
+        CLIENT_URL: 'http://tuberoast.example',
+        GOOGLE_REDIRECT_URI: 'http://tuberoast.example/api/auth/google/callback',
+      }
+      expect(() => loadEnv(production)).toThrow(/CLIENT_URL: must use https:\/\/ in production/)
+      expect(() => loadEnv(production)).toThrow(/GOOGLE_REDIRECT_URI: must use https:\/\/ in production/)
+    })
+
+    it('accepts https URLs in production, and localhost for a local rehearsal', () => {
+      expect(() =>
+        loadEnv({
+          ...validEnv,
+          NODE_ENV: 'production',
+          CLIENT_URL: 'https://tuberoast.onrender.com',
+          GOOGLE_REDIRECT_URI: 'https://tuberoast.onrender.com/api/auth/google/callback',
+        }),
+      ).not.toThrow()
+      expect(() => loadEnv({ ...validEnv, NODE_ENV: 'production' })).not.toThrow() // validEnv uses localhost
+    })
+
     it('normalizes CLIENT_URL to its origin (drops a trailing slash)', () => {
       expect(loadEnv({ ...validEnv, CLIENT_URL: 'http://localhost:5173/' }).CLIENT_URL).toBe('http://localhost:5173')
     })

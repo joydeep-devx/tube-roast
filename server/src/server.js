@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { createApp } from './app.js'
 import { connectToDatabase, disconnectFromDatabase, redactConnectionString } from './config/database.js'
 import { loadEnv } from './config/env.js'
@@ -26,11 +28,21 @@ try {
   process.exit(1)
 }
 
+const isProduction = env.NODE_ENV === 'production'
+
+// In production this server also serves the React build (npm run build in the repo root creates it).
+const clientDistDir = isProduction ? fileURLToPath(new URL('../../client/dist', import.meta.url)) : undefined
+if (clientDistDir && !existsSync(`${clientDistDir}/index.html`)) {
+  console.error('client/dist/index.html is missing. Run "npm run build" in the repository root before starting.')
+  process.exit(1)
+}
+
 const app = createApp({
   config: {
     clientUrl: env.CLIENT_URL,
     sessionSecret: env.SESSION_SECRET,
-    isProduction: env.NODE_ENV === 'production',
+    isProduction,
+    clientDistDir,
   },
   googleAuth: createGoogleAuth({
     clientId: env.GOOGLE_CLIENT_ID,
@@ -47,7 +59,7 @@ const app = createApp({
 })
 
 const server = app.listen(env.PORT, () => {
-  console.log(`TubeRoast API listening on http://localhost:${env.PORT} (${env.NODE_ENV})`)
+  console.log(`TubeRoast listening on port ${env.PORT} (${env.NODE_ENV}). App URL: ${env.CLIENT_URL}`)
 })
 
 server.on('error', (error) => {

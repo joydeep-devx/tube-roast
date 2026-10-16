@@ -1,0 +1,12 @@
+{
+  "name": "tuberoast",
+  "private": true,
+  "description": "Build and start scripts for deploying TubeRoast as one service (Express serves the React build).",
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "build": "npm ci --include=dev --prefix client && npm run build --prefix client && npm ci --omit=dev --prefix server",
+    "start": "npm start --prefix server"
+  }
+}

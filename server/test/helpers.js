@@ -120,12 +120,14 @@ export function createTestApp({
   roastService = createFakeRoastService(),
   userService = createFakeUserService(),
   roastRateLimiter,
+  config = {},
 } = {}) {
   const app = createApp({
     config: {
       clientUrl: TEST_CLIENT_URL,
       sessionSecret: 'test-session-secret-that-is-at-least-32-chars',
       isProduction: false,
+      ...config,
     },
     googleAuth,
     youtubeClient,

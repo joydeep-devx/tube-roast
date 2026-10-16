@@ -8,6 +8,7 @@ import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
 import { createAuthRateLimiter, createRoastRateLimiter } from './middleware/rateLimit.js'
 import { createRequireAuth } from './middleware/requireAuth.js'
+import { serveClient } from './middleware/serveClient.js'
 import { verifyOrigin } from './middleware/verifyOrigin.js'
 import { createAuthRouter } from './routes/auth.routes.js'
 import { healthRouter } from './routes/health.routes.js'
@@ -34,8 +35,27 @@ export function createApp({
 }) {
   const app = express()
 
+  if (config.isProduction) {
+    // Render (like most hosts) sits behind one proxy that terminates HTTPS. Trusting it lets Express see
+    // the real protocol (so Secure cookies are sent) and the real client IP (so rate limits are per user).
+    app.set('trust proxy', 1)
+  }
+
   // Security headers, and removes the X-Powered-By header that advertises Express.
-  app.use(helmet())
+  // Helmet's default CSP is kept; images are also allowed from Google's avatar host.
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: { 'img-src': ["'self'", 'data:', 'https://lh3.googleusercontent.com'] },
+      },
+    }),
+  )
+
+  // Built React app (production only). Before the session middleware, so static files never touch the session store.
+  if (config.clientDistDir) {
+    app.use(serveClient(config.clientDistDir))
+  }
+
   // Parses JSON bodies. The small limit stops oversized payloads from tying up the server.
   app.use(express.json({ limit: '10kb' }))
   app.use(
