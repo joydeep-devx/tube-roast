@@ -6,7 +6,9 @@ import AppLayout from './layouts/AppLayout.jsx'
 import HistoryPage from './pages/HistoryPage.jsx'
 import LandingPage from './pages/LandingPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
+import PrivacyPage from './pages/PrivacyPage.jsx'
 import RoastDetailPage from './pages/RoastDetailPage.jsx'
+import TermsPage from './pages/TermsPage.jsx'
 
 function App() {
   return (
@@ -36,6 +38,9 @@ function App() {
                     </RequireAuth>
                   }
                 />
+                {/* Public pages, also linked from Google's consent screen. */}
+                <Route path="privacy" element={<PrivacyPage />} />
+                <Route path="terms" element={<TermsPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Route>
             </Routes>

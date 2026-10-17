@@ -50,3 +50,14 @@
     @apply outline-2 outline-offset-2 outline-accent;
   }
 }
+
+@layer components {
+  /* Readable lists inside the privacy policy and terms (Tailwind removes list bullets by default). */
+  .legal-prose ul {
+    @apply list-disc space-y-1.5 pl-5 marker:text-accent;
+  }
+
+  .legal-prose strong {
+    @apply font-semibold text-ink;
+  }
+}
